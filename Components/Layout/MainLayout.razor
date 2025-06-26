@@ -1,0 +1,71 @@
+﻿@using Assignment.Entities
+@using Assignment.Services
+@using Microsoft.AspNetCore.Mvc
+@inherits LayoutComponentBase
+@inject IWorkReportService WorkReportService
+@inject IEmployeeService EmployeeService
+<div class="page">
+    <div class="sidebar">
+        <NavMenu/>
+    </div>
+    <main>
+    <div class="top-row px-4">
+        <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+    </div>
+        @if (_isLoading)
+    {
+    <p>Loading...</p>
+    }
+    @if (!_employees.Any())
+        {
+            <p>No employees found.</p>
+        }
+        else
+        {
+        <article class="content px-4">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Full Name</th>
+                        <th>Working Hours</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var employee in _employees)
+                    {
+                        <tr>
+                            <td style="@(employee.TotalWorkingHours < 100 ? "background-color: #ffcccc;" : "")">
+                                @employee.FullName
+                            </td>
+                            <td style="@(employee.TotalWorkingHours < 100 ? "background-color: #ffcccc;" : "")">
+                                @employee.TotalWorkingHours
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+        </article>
+    <article>
+        <h3> Pie Chart</h3>
+        <img src="/chart/image" alt="Pie Chart"/>
+    </article>
+    }
+    </main>
+</div>
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+@code
+{
+    private bool _isLoading = true;
+    private List<Employee> _employees = [];
+    protected override async Task OnInitializedAsync()
+    {
+        var workReports = await WorkReportService.GetWorkReportsAsync();
+        _employees = EmployeeService.GetEmployees(workReports).ToList();
+        _isLoading = false;
+        await base.OnInitializedAsync();
+    }
+}
